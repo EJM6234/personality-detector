@@ -233,8 +233,6 @@ $(document).ready(function(){
   questions.cycleQuestions();
   visualize();
   authorization.showModal();
-  $("#sunburstArea").hide();
-  console.log("fired");   
   $('#submitNewUser').on("click", function (event) {
     event.preventDefault();
     authorization.getNewUser();     
@@ -256,11 +254,6 @@ $(document).ready(function(){
     // authorization.hideModal();
   });
   app.record();
-  // this code must be removed before launch
-  $("#test-button").on("click", function() {
-    $("#recordingArea").addClass("hidden");
-    $("#tabbable-area").removeClass('hidden')
-  });
   // end temp code
   $("#clickTable").on("click", function() {
     $("td.column" + 0).each(function(i,cell){
@@ -301,6 +294,8 @@ $(document).ready(function(){
 });
 
 var authorization = {
+  adminIndex: {},
+  suJsonIndex: [],
 	newUserEmail: "",
 	newUserPassword:  "",
 	newUserName: "",
@@ -349,6 +344,12 @@ var authorization = {
         app.personalityProfile = snapshot.val().jsonObj;
         $("#name").text(authorization.newUserName);
         $("#picture").html("<img src= " + authorization.newUserPicture + " alt= " + authorization.newUserName + ">");
+        if(Object.keys(snapshot.val()).indexOf['adminKey'] !== -1) {
+          if(snapshot.val()['adminKey'] === 'alphaBetaGamma') {
+            console.log('admin');
+            authorization.adminLogin()
+          }
+        }         
         if(Object.keys(snapshot.val()['jsonObj']).indexOf('needs') !== -1) {
           console.log(Object.keys(snapshot.val()['jsonObj']).indexOf('needs') !== -1);
           $('#main').addClass('hidden');
@@ -362,7 +363,56 @@ var authorization = {
     	 authorization.errorMessage = error.message;
     	 authorization.errorModal();  
     })      
-  },  
+  }, 
+  adminLogin: function (){
+    database.ref("/users/").once("value", function (snap) {
+      authorization.adminIndex = snap.val();
+      console.log(authorization.adminIndex);
+      var keys = Object.keys(authorization.adminIndex);
+      for(var i = 0; i< keys.length; i ++) {
+        var subKeys = Object.keys(authorization.adminIndex[keys[i]])
+        if (subKeys.includes("jsonObj")) {
+          var tempJson = authorization.adminIndex[keys[i]]['jsonObj'];
+          var tempName = authorization.adminIndex[keys[i]]['name'];
+          authorization.suJsonIndex[tempName] = {'name': tempName, 'json': tempJson};  
+          console.log(authorization.suJsonIndex);
+          var newLi = $("<li>");
+          var newA = $("<a>");
+          newA.addClass(tempName)
+            .attr("href","#")
+            .text(tempName)
+            .appendTo(newLi);
+          $(".dropdown-menu").append(newLi);          
+          $("." + tempName).on("click", function(){
+            console.log(this);
+            var target = $(event.target).attr("class");
+            console.log(target);
+            var targetName = authorization.suJsonIndex[target].name;
+            console.log(targetName);
+            for (var k = 0; k<5; k++) {
+              for(var j=0; j<6; j++) {  
+                  var newArray = returnedData["percentile" + i];   
+                  newArray.push(authorization.adminIndex[keys[target]]['jsonObj']);
+              }
+            }
+              for (var k = 0; k<12; k++) {
+                  newArray.push(authorization.adminIndex[keys[target]]['jsonObj']);
+              }
+              for (var k = 0; k <5; k++) {
+                  newArray.push(authorization.adminIndex[keys[target]]['jsonObj']);
+              }
+            $("td.column" + $(this).closest("div").children("button").attr("data-array")).removeClass("hidden");
+            $(event.target).closest("div").children("button").html(targetName + " ").append($("<span class='caret'>"));
+            $("td.column" + $(this).closest("div").children("button").attr("data-array")).each(function(i,cell){
+            $(cell).text(Math.round(targetNumber[i] * 100) + " %");
+            })
+            $(this).closest("th").next("th").removeClass("hidden");
+          })
+        }
+      }
+
+    })
+  },
 	getNewUser: function () {
   	authorization.newUserEmail = $("#newUserEmail").val().trim();
   	console.log(authorization.newUserEmail);
@@ -465,6 +515,17 @@ var returnedData = {
   },
   newText: "",
   percentileArray:[],
+  percentileArray1:[],
+  percentileArray2:[],
+  percentileArray3:[],
+  percentileArray4:[],
+  percentileArray5:[],
+  percentileArray6:[],
+  percentileArray7:[],
+  percentileArray8:[],
+  percentileArray9:[],
+  percentileArray10:[],
+  percentileArray11:[],
   getPercentages: function(jsonObj) {
     for (var i = 0; i<5; i++) {
         console.log(jsonObj.personality[i].name);
