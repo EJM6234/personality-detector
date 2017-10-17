@@ -382,7 +382,7 @@ var authorization = {
             .attr("href","#")
             .text(tempName)
             .appendTo(newLi);
-          $(".dropdown-menu").append(newLi);          
+          newLi.prepend(".dropdown-menu");          
           $("." + tempName).on("click", function(){
             console.log(this);
             var target = $(event.target).attr("class");
@@ -392,6 +392,7 @@ var authorization = {
             for (var k = 0; k<5; k++) {
               for(var j=0; j<6; j++) {  
                   var newArray = returnedData["percentile" + i];   
+                  console.log(newArray);
                   newArray.push(authorization.adminIndex[keys[target]]['jsonObj']);
               }
             }
@@ -404,7 +405,7 @@ var authorization = {
             $("td.column" + $(this).closest("div").children("button").attr("data-array")).removeClass("hidden");
             $(event.target).closest("div").children("button").html(targetName + " ").append($("<span class='caret'>"));
             $("td.column" + $(this).closest("div").children("button").attr("data-array")).each(function(i,cell){
-            $(cell).text(Math.round(targetNumber[i] * 100) + " %");
+            $(cell).text(Math.round(newArray[i] * 100) + " %");
             })
             $(this).closest("th").next("th").removeClass("hidden");
           })
